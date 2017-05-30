@@ -1,5 +1,6 @@
 package server;
 
+import dataStructures.CircularQueueArray;
 import dataStructures.QueueArray;
 import request.Request;
 
@@ -10,15 +11,15 @@ import java.util.*;
  */
 public class ProcessServer {
 
-    private QueueArray waitingQueue;
+    private CircularQueueArray waitingQueue;
 
     public ProcessServer() {
 
-        waitingQueue =  new QueueArray(10);
+        waitingQueue =  new CircularQueueArray(5);
 
     }
 
-    public QueueArray getWaitingQueue() {
+    public CircularQueueArray getWaitingQueue() {
         return waitingQueue;
     }
 }

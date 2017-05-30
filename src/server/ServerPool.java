@@ -1,25 +1,34 @@
 package server;
 
+import java.util.ArrayList;
+
 /**
  * Created by Juilee on 5/28/2017.
  */
 public class ServerPool {
 
     private int poolSize;
-    private ProcessServer[] servers;
-    private static final ServerPool serverPool = new ServerPool(10);
+    private ArrayList<ProcessServer> servers;
 
-    private ServerPool(int poolSize) {
+
+    public ServerPool(int poolSize) {
         this.poolSize = poolSize;
-        servers = new ProcessServer[poolSize];
+        servers = new ArrayList<>(poolSize);
+        addServers();
     }
 
-    public ServerPool getInstance()
-    {
-        return serverPool;
-    }
-
-    public ProcessServer[] getServers() {
+    public ArrayList<ProcessServer> getServers() {
         return servers;
     }
+
+    private void addServers()
+    {
+        for(int i=0;i<poolSize;i++)
+        {
+            ProcessServer processServer = new ProcessServer();
+            servers.add(processServer);
+        }
+    }
+
+
 }
