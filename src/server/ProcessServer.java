@@ -11,12 +11,21 @@ import java.util.*;
  */
 public class ProcessServer {
 
+    private String name;
     private CircularQueueArray waitingQueue;
 
-    public ProcessServer() {
+    public ProcessServer(String name) {
+        this.name = name;
+        this.waitingQueue = new CircularQueueArray(5);
 
-        waitingQueue =  new CircularQueueArray(5);
+    }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public CircularQueueArray getWaitingQueue() {

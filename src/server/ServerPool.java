@@ -25,7 +25,7 @@ public class ServerPool {
     {
         for(int i=0;i<poolSize;i++)
         {
-            ProcessServer processServer = new ProcessServer();
+            ProcessServer processServer = new ProcessServer("Server "+i);
             servers.add(processServer);
         }
     }

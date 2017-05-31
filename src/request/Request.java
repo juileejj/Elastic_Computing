@@ -13,8 +13,8 @@ public class Request {
     private String status;
     private static final int WAITINGTIME =5000;
 
-    public Request() {
-        /*waitingTime=5000;*/
+    public Request(String requestName) {
+        this.requestName = requestName;
     }
 
     public String getRequestName() {

@@ -16,9 +16,11 @@ public class RequestQueueThread implements Runnable {
 
     @Override
     public void run() {
-        for(int i=0;i<10;i++)
+        for(int i=0;i<50;i++)
         {
-            Request request = new Request();
+            Request request = new Request("Request "+i);
+            request.setStatus("INCOMING");
+            request.setProcessingTime(2000);
             request.setStartTime(System.currentTimeMillis());
             requestQueue.getRequestQueue().add(request);
             try {
@@ -26,7 +28,6 @@ public class RequestQueueThread implements Runnable {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            //System.out.println("Request start time"+request.getStartTime());
         }
     }
 }

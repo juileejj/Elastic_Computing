@@ -2,12 +2,12 @@ package threads;
 
 import request.Request;
 import request.RequestQueue;
-import server.InitialServerArray;
 import server.ProcessServer;
 import server.ServerPool;
 
 import java.util.ArrayList;
 import java.util.Queue;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Created by Juilee on 5/28/2017.
@@ -15,14 +15,16 @@ import java.util.Queue;
 public class DispatcherThread implements Runnable {
 
     private RequestQueue requestQueue;
-    private static ArrayList<ProcessServer> availableServers;
+    private static CopyOnWriteArrayList<ProcessServer> availableServers;
     private ServerPool serverPool;
 
-    public DispatcherThread(RequestQueue requestQueue, ServerPool serverPool) {
+    public DispatcherThread(RequestQueue requestQueue, ServerPool serverPool,CopyOnWriteArrayList<ProcessServer> availableServers) {
         this.requestQueue = requestQueue;
         this.serverPool = serverPool;
-        availableServers = new ArrayList<>();
-
+        this.availableServers = availableServers;
+        ProcessServer processServer = serverPool.getServers().get(0);
+        availableServers.add(processServer);
+        serverPool.getServers().remove(processServer);
     }
 
     @Override
@@ -33,36 +35,47 @@ public class DispatcherThread implements Runnable {
 
 
             synchronized (rQueue) {
+
                 while (rQueue.peek() != null) {
-                    //long initialWaitingTime = System.currentTimeMillis() - rQueue.peek().getStartTime();
-                    // if (initialWaitingTime <= rQueue.peek().getWaitingTime()) {
 
                     Request req = rQueue.poll();
                     Thread.sleep(1000);
-                    for(ProcessServer server:availableServers)
-                    {
-                        if(!server.getWaitingQueue().isFull()) {
-                            System.out.println("Server pool size" + serverPool.getServers().size());
-                            server.getWaitingQueue().enqueue(req);
-                            System.out.println("Peek Waiting queue:" + server.getWaitingQueue().peek());
-                        }
-                        else{
-                            ProcessServer processServer = serverPool.getServers().get(0);
-                            availableServers.add(processServer);
-                            serverPool.getServers().remove(processServer);
-                            server.getWaitingQueue().enqueue(req);
-                            System.out.println("Inside else");
+
+                    for (ProcessServer pServer : availableServers) {
+                        if (!pServer.getWaitingQueue().isFull()) {
+                            req.setStatus("WAITING");
+                            pServer.getWaitingQueue().enqueue(req);
+                            System.out.println(req.getRequestName() + " " + req.getStatus());
                         }
                     }
-                    System.out.println("Server pool size:"+serverPool.getServers().size());
+                    if (!req.getStatus().equals("WAITING")) {
+                        ProcessServer server = serverPool.getServers().get(0);
+                        availableServers.add(server);
+                        System.out.println(server.getName());
+                        serverPool.getServers().remove(server);
+                        req.setStatus("WAITING");
+                        server.getWaitingQueue().enqueue(req);
+                        System.out.println(req.getRequestName() + " " + req.getStatus());
+                    }
 
 
-                    //  }
+                    System.out.println("Server pool size:" + serverPool.getServers().size());
+
+
                 }
 
             }
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    public void startProcessing() throws InterruptedException {
+
+        Thread requestProcessThread = new Thread(new RequestProcessThread(availableServers));
+        requestProcessThread.start();
+        System.out.println("Process started");
+        requestProcessThread.join();
+
     }
 }
